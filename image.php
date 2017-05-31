@@ -33,7 +33,20 @@ $quality = 9;
    
                 global $quality;
                 global $i;
-                $file = "covers/".md5($user[0]['name']).".png";   
+                $exist = true;
+                $incriment = 0;
+
+                while ($exist) {
+                 $file_name = 'covers/image'.$incriment.'.png';
+                    if (file_exists($file_name)) {
+                        $incriment += 1;
+                        $exist = true;
+                    } else {
+                         $exist = false;
+                        $file = "covers/image".$incriment.".png";  
+                    }
+                }
+ 
             
 
                     // define the base image that we lay our text on                  
@@ -48,7 +61,6 @@ $quality = 9;
 
                     // this defines the starting height for the text block
                     $y = imagesy($im) - 0 - 300;
-                    echo $y;
                      
                 // loop through the array and write the text                   
                 foreach ($user as $value)
@@ -65,8 +77,6 @@ $quality = 9;
 
                     imagettftext($im, $value['font-size'], 0, $x, $y+$i, imagecolorallocate($im,$RGB[0],$RGB[1],$RGB[2]), $fontfamily ,$value['name']);
 
-
-                    // add 32px to the line height for the next text block
                     $i = $i+1; 
                     
                 }
@@ -86,23 +96,41 @@ $quality = 9;
                     
                     return ceil(($image_width - $dimensions[4]) / 2);               
         }
+
+                             
             
-        // getting data from index.php    
+        if(isset($_POST['image'])){
+
+                // getting data from index.php    
         $user = array(           
                     array(
                         'name'=> $_POST['printchatbox'], 
                         'font-size'=>'12',
                         'color'=>$_POST['color'],
                         'fontname'=> 'font/Capriola-Regular.ttf',
-                        'image'=>"images/".$_POST['image'],
+                        'image'=> $_POST['image'],
 
                         ),               
-                );                   
-            
+                ); 
 
-        // run the script to create the image
+         // run the script to create the image
         $filename = create_image($user);
+
+        }
+
 
 ?>
 
-<img src="<?=$filename;?>?id=<?=rand(0,1292938);?>" width="300" height="auto"/>
+<?php if (!empty($filename)) { ?>
+    <img src="<?=$filename;?>?id=<?=rand(0,1292938);?>" width="300px" height="300px"/>
+<?php
+}else{
+    $dirname = "covers/";
+    $images = glob($dirname."*.png");
+
+ ?>
+    <img src=" <?php echo end($images); ?>" width="300px" height="300px" />
+<?php 
+ 
+}
+?>
